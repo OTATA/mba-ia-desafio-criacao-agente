@@ -1,5 +1,6 @@
 """API FastAPI do assistente (contrato do enunciado)."""
 import asyncio
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException
@@ -75,12 +76,16 @@ def _pendentes(session) -> list[dict]:
 
 async def _executar(session_id: str, content: types.Content) -> dict:
     textos: list[str] = []
-    async for ev in runner.run_async(user_id=USER_ID, session_id=session_id, new_message=content):
-        if ev.author == "user" or not ev.content or ev.partial:
-            continue
-        if ev.get_function_calls() or ev.get_function_responses():
-            continue
-        textos += [p.text for p in ev.content.parts or [] if p.text and not p.thought]
+    try:
+        async for ev in runner.run_async(user_id=USER_ID, session_id=session_id, new_message=content):
+            if ev.author == "user" or not ev.content or ev.partial:
+                continue
+            if ev.get_function_calls() or ev.get_function_responses():
+                continue
+            textos += [p.text for p in ev.content.parts or [] if p.text and not p.thought]
+    except Exception as e:  # falha do modelo (cota, indisponibilidade): erro claro, dados intactos
+        logging.exception("falha na execução do agente")
+        raise HTTPException(503, f"Modelo indisponível: {type(e).__name__}") from e
     session = await _sessao(session_id)
     return {"resposta": "\n".join(textos).strip(), "confirmacoes_pendentes": _pendentes(session)}
 

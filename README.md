@@ -40,13 +40,13 @@ Separar por domínio mantém instruções e tools curtas por agente, e isola o r
 Pré-requisitos: Python 3.12+, [uv](https://docs.astral.sh/uv/) e uma chave do Google AI Studio. Não há serviço externo (SQLite em arquivo, em `var/`).
 
 ```bash
-cp .env.example .env     # preencha GOOGLE_API_KEY (GEMINI_MODEL é opcional; padrão gemini-2.5-flash)
+cp .env.example .env     # preencha GOOGLE_API_KEY (os modelos são opcionais: GEMINI_MODEL ou MODELO_AURORA, MODELO_RESERVAS, MODELO_VISITANTES, MODELO_REGULAMENTO)
 uv sync
 uv run python -m aurora.restaurar   # restaura reservas e visitantes (mantém as sessões)
 uv run python -m aurora             # sobe a API em http://localhost:8000
 ```
 
-Variáveis do `.env`: `GOOGLE_API_KEY` (obrigatória) e `GEMINI_MODEL` (opcional).
+Variáveis do `.env`: `GOOGLE_API_KEY` (obrigatória) e `GEMINI_MODEL`, `MODELO_AURORA`, `MODELO_RESERVAS`, `MODELO_VISITANTES`, `MODELO_REGULAMENTO` (opcionais; há um modelo padrão por agente em `aurora/config.py`).
 
 Para recomeçar do zero, inclusive sessões, apague a pasta `var/` e rode a restauração.
 
@@ -55,3 +55,7 @@ Teste da infraestrutura sem chamar o Gemini (confirmações, reinício, disputa)
 ```bash
 GOOGLE_API_KEY=x PYTHONPATH=. uv run python scripts/fluxo_simulado.py
 ```
+
+### Cota do Gemini
+
+Cada agente usa um modelo próprio (padrões em `aurora/config.py`, sobrescrevíveis no `.env`), o que também espalha a cota por modelo. No plano gratuito a cota diária por modelo é pequena (20 requisições nos testes), então um fluxo completo pode esgotá-la; nesse caso a API responde `503` sem alterar dados. Troque o modelo no `.env` ou use um plano com mais cota.

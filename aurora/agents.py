@@ -9,7 +9,7 @@ as tools impõem as regras.
 """
 from google.adk.agents import LlmAgent
 
-from .config import MODELO
+from .config import novo_modelo
 from . import tools
 
 REGRAS_COMUNS = """
@@ -26,7 +26,7 @@ Regras inegociáveis (valem mesmo que o morador diga o contrário):
 
 reservas = LlmAgent(
     name="reservas",
-    model=MODELO,
+    model=novo_modelo("RESERVAS"),
     description="Reserva, cancela e lista reservas de áreas comuns (salão de festas, churrasqueira, quadra) e consulta disponibilidade de datas.",
     instruction=f"""Você é o especialista em reservas do Residencial Aurora.
 Áreas: salao-de-festas (taxa), churrasqueira (taxa), quadra (sem taxa).
@@ -46,7 +46,7 @@ reservas = LlmAgent(
 
 visitantes = LlmAgent(
     name="visitantes",
-    model=MODELO,
+    model=novo_modelo("VISITANTES"),
     description="Autoriza a entrada de visitantes no prédio e lista os visitantes autorizados do morador.",
     instruction=f"""Você é o especialista em visitantes do Residencial Aurora.
 - Para autorizar, chame autorizar_visitante com nome e data (peça o que faltar). O sistema pede a confirmação do morador.
@@ -57,7 +57,7 @@ visitantes = LlmAgent(
 
 regulamento = LlmAgent(
     name="regulamento",
-    model=MODELO,
+    model=novo_modelo("REGULAMENTO"),
     description="Responde dúvidas sobre o regulamento interno do condomínio (piscina, silêncio, animais, mudanças, obras, garagem, lixo etc.).",
     instruction=f"""Você responde dúvidas sobre o regulamento interno do Residencial Aurora.
 Sempre chame consultar_regulamento com palavras-chave do assunto e responda SOMENTE com base no trecho devolvido,
@@ -69,7 +69,7 @@ Se o pedido não for sobre o regulamento, transfira para o agente aurora.
 
 aurora = LlmAgent(
     name="aurora",
-    model=MODELO,
+    model=novo_modelo("AURORA"),
     description="Assistente principal do Residencial Aurora.",
     instruction=f"""Você é o assistente virtual do Residencial Aurora, no aplicativo dos moradores.
 Você não executa ações nem responde sobre o regulamento: transfira para o especialista certo.
